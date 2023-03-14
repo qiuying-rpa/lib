@@ -5,16 +5,17 @@ import win32com.client
 from models.excel import ExcelObj
 
 
-def open_excel(file_path, sheet_name=1, excel_type="office", password=None, visible=True):
+def open_excel(file_path, sheet_name=1, password=None, visible=True):
     """
     打开已有 Excel
     :param file_path:
     :param sheet_name:
-    :param excel_type:
+
     :param password:
     :param visible:
     :return:
     """
+    # todo excel_type  office/wps
     if not os.path.exists(file_path):
         raise Exception('目标文件不存在，请确认后重试')
     xlapp = None
@@ -29,13 +30,15 @@ def open_excel(file_path, sheet_name=1, excel_type="office", password=None, visi
             workbook = xlapp.Workbooks(name)
         else:
             if password:
-                workbook = xlapp.Workbooks.Open(file_path, UpdateLinks=False, ReadOnly=False, Format=None, Password=password)
+                workbook = xlapp.Workbooks.Open(file_path, UpdateLinks=False, ReadOnly=False, Format=None,
+                                                Password=password)
             else:
                 workbook = xlapp.Workbooks.Open(file_path)
     if not workbook:
         xlapp = win32com.client.DispatchEx('Excel.Application')
         if password:
-            workbook = xlapp.Workbooks.Open(file_path, UpdateLinks=False, ReadOnly=False, Format=None, Password=password)
+            workbook = xlapp.Workbooks.Open(file_path, UpdateLinks=False, ReadOnly=False, Format=None,
+                                            Password=password)
         else:
             workbook = xlapp.Workbooks.Open(file_path)
 
@@ -65,7 +68,7 @@ def create_excel(file_path, visible=True):
         print("目标文件已存在，无需新建！")
     try:
         xlapp = win32com.client.GetActiveObject('Excel.Application')
-    except:
+    except Exception as e:
         xlapp = win32com.client.Dispatch('Excel.Application')
     xlapp.Visible = visible
     xlapp.DisplayAlerts = False
@@ -168,10 +171,10 @@ def get_value(excel_obj, region_text, attr="真实值"):
     读取Excel内容
     :param excel_obj:
     :param region_text:
-    :param text_type:[“真实值”, "显示值", "公式"]
+    :param attr:[“真实值”, "显示值", "公式"]
     :return:
     """
-    region = __get_region(excel_obj, region_text)
+    region = _get_region(excel_obj, region_text)
     if attr == "显示值":
         data = tuple(map(lambda row: tuple(map(lambda col: col.Text, row.Columns)), region.Rows))
     elif attr == "真实值":
@@ -198,7 +201,7 @@ def set_value(excel_obj, region_text, value, str_flag=False):
     :param str_flag:
     :return:
     """
-    cell = __get_region(excel_obj, region_text).Cells(1, 1)
+    cell = _get_region(excel_obj, region_text).Cells(1, 1)
     col = cell.Column
     row = cell.Row
 
@@ -207,14 +210,14 @@ def set_value(excel_obj, region_text, value, str_flag=False):
         if not type_check:
             raise Exception("列表(元组)格式错误，仅支持二维列表(元组)，请检查。")
         cols = max(len(i) for i in value)
-        value = list(map(lambda x: x + [""]*(cols-len(x)), value))
+        value = list(map(lambda x: x + [""] * (cols - len(x)), value))
         rows = len(value)
         write_region_text = "{0},{1}:{2},{3}".format(row, col, row + rows - 1, col + cols - 1)
     elif isinstance(value, (str, float, int)):
         write_region_text = region_text
     else:
         raise Exception("不支持的数据类型写入。")
-    region = __get_region(excel_obj, write_region_text)
+    region = _get_region(excel_obj, write_region_text)
     if str_flag:
         region.NumberFormat = '@'
         region.Value = value
@@ -222,7 +225,7 @@ def set_value(excel_obj, region_text, value, str_flag=False):
         region.Value = value
 
 
-def close_excel(excel_obj,close_type="关闭指定Excel", save_flag=True, file_path=None):
+def close_excel(excel_obj, close_type="关闭指定Excel", save_flag=True, file_path=None):
     """
     关闭Excel
     :param close_type: ["关闭指定Excel", "关闭所有Excel"]
@@ -252,7 +255,7 @@ def get_row_count(excel_obj):
     :param excel_obj:
     :return:
     """
-    return __get_region(excel_obj, "all").Rows.Count
+    return _get_region(excel_obj, "all").Rows.Count
 
 
 def get_column_count(excel_obj):
@@ -261,36 +264,36 @@ def get_column_count(excel_obj):
     :param excel_obj:
     :return:
     """
-    return __get_region(excel_obj, "all").Columns.Count
+    return _get_region(excel_obj, "all").Columns.Count
 
 
 def insert_rows(excel_obj, row, row_num=1):
     """
     插入行
     :param excel_obj:
-    :param line: 指定行前插入一行
-    :param line_num:
+    :param row: 指定行前插入一行
+    :param row_num:
     :return:
     """
-    region = __get_region(excel_obj, "{0}:{0}".format(row), used=False)
+    region = _get_region(excel_obj, "{0}:{0}".format(row), used=False)
     for i in range(row_num):
         region.Insert()
 
 
-def insert_columns(excel_obj, column, colomn_num=1):
+def insert_columns(excel_obj, column, column_num=1):
     """
     插入列
     :param excel_obj:
     :param column:指定列前插入一行
-    :param colomn_num:
+    :param column_num:
     :return:
     """
     if str(column).isdigit():
         column = int(column)
     if isinstance(column, int):
         column = tran_col_location(column)
-    region = __get_region(excel_obj, "{0}:{0}".format(column),used=False)
-    for i in range(colomn_num):
+    region = _get_region(excel_obj, "{0}:{0}".format(column), used=False)
+    for i in range(column_num):
         region.Insert()
 
 
@@ -302,7 +305,7 @@ def delete_rows(excel_obj, start_row, end_row):
     :param end_row:
     :return:
     """
-    region = __get_region(excel_obj,"{0}:{1}".format(start_row, end_row), used=False)
+    region = _get_region(excel_obj, "{0}:{1}".format(start_row, end_row), used=False)
     region.Delete()
 
 
@@ -324,7 +327,7 @@ def delete_columns(excel_obj, start_col, end_row):
     if isinstance(end_row, int):
         end_row = tran_col_location(end_row)
 
-    region = __get_region(excel_obj, "{0}:{1}".format(start_col, end_row), used=False)
+    region = _get_region(excel_obj, "{0}:{1}".format(start_col, end_row), used=False)
     region.Delete()
 
 
@@ -332,12 +335,12 @@ def set_region_shape(excel_obj, region_text, width=-1, height=-1):
     """
     区域长宽设置
     :param excel_obj:
-    :param range_text:
+    :param region_text:
     :param width:-1为不设置， AUTO为自适应
     :param height:-1为不设置， AUTO为自适应
     :return:
     """
-    region = __get_region(excel_obj, region_text)
+    region = _get_region(excel_obj, region_text)
     if str(width).upper() == "AUTO":
         region.Columns.AutoFit()
 
@@ -359,7 +362,7 @@ def set_region_format(excel_obj, region_text, format_text=None):
     :param format_text:
     :return:
     """
-    region = __get_region(excel_obj, region_text)
+    region = _get_region(excel_obj, region_text)
     # 仅设置单元格数字格式
     num_format_map = {
         "文本": "@",
@@ -378,7 +381,7 @@ def merge_cells(excel_obj, region_text):
     :param region_text:
     :return:
     """
-    region = __get_region(excel_obj, region_text)
+    region = _get_region(excel_obj, region_text)
     region.Merge()
 
 
@@ -389,7 +392,7 @@ def unmerge_cells(excel_obj, region_text):
     :param region_text:
     :return:
     """
-    region = __get_region(excel_obj, region_text)
+    region = _get_region(excel_obj, region_text)
     region.UnMerge()
 
 
@@ -397,7 +400,7 @@ def excel_sort(excel_obj, sort_args):
     """
     排序
     :param excel_obj:
-    :param region_text:
+    :param sort_args:
     :return:
     """
     """sort attr
@@ -431,40 +434,41 @@ def excel_sort(excel_obj, sort_args):
         xlSortNormal            0   分别对数字和文本数据进行排序。  默认值
         xlSortTextAsNumbers     1   将文本作为数字型数据进行排序。
     """
-    sort_args = {
-        "SortFields": [
-            {
-                "region": "A",
-                "SortOn": 0,
-                "Order": 1,
-                "DataOption": 0
-            },
-            {
-                "region": "B",
-                "SortOn": 0,
-                "Order": 2,
-                "DataOption": 0
-            }
-        ],
-        "SortAttr": {
-            "SetRange": "",
-            "MatchCase": False,
-            "Header": 2,
-            "Orientation": 1,
-            "SortMethod": 1
-        }
-    }
+    # sort_args = {
+    #     "SortFields": [
+    #         {
+    #             "region": "A",
+    #             "SortOn": 0,
+    #             "Order": 1,
+    #             "DataOption": 0
+    #         },
+    #         {
+    #             "region": "B",
+    #             "SortOn": 0,
+    #             "Order": 2,
+    #             "DataOption": 0
+    #         }
+    #     ],
+    #     "SortAttr": {
+    #         "SetRange": "",
+    #         "MatchCase": False,
+    #         "Header": 2,
+    #         "Orientation": 1,
+    #         "SortMethod": 1
+    #     }
+    # }
     excel_obj.worksheet.Sort.SortFields.Clear()
     for sort_field in sort_args["SortFields"]:
-        region = __get_region(excel_obj, sort_field["region"])
+        region = _get_region(excel_obj, sort_field["region"])
         excel_obj.worksheet.Sort.SortFields.Add(Key=region,
                                                 SortOn=sort_field["SortOn"],
                                                 Order=sort_field["Order"],
                                                 DataOption=sort_field["DataOption"])
-    if len(sort_args["SortFields"]) > 1:
-        excel_obj.worksheet.Sort.SetRange(__get_region(excel_obj, "all"))
-    else:
-        excel_obj.worksheet.Sort.SetRange(region)
+    # if len(sort_args["SortFields"]) > 1:
+    #     excel_obj.worksheet.Sort.SetRange(_get_region(excel_obj, "all"))
+    # else:
+    #     excel_obj.worksheet.Sort.SetRange(region)
+    excel_obj.worksheet.Sort.SetRange(_get_region(excel_obj, "all"))  # 默认扩展选定区域
     excel_obj.worksheet.Sort.MatchCase = sort_args["SortAttr"]["MatchCase"]
     excel_obj.worksheet.Sort.Header = sort_args["SortAttr"]["Header"]
     excel_obj.worksheet.Sort.Orientation = sort_args["SortAttr"]["Orientation"]
@@ -478,12 +482,12 @@ def filter_col(excel_obj, region_text, criteria1, option="筛选值", criteria2=
     筛选列数据
     :param excel_obj:
     :param region_text:
-    :param criteria:
+    :param criteria1:
     :param option: 仅支持[筛选值, 条件1和条件2的逻辑与, 条件1和条件2的逻辑或]
     :param criteria2:
     :return:
     """
-    cell = __get_region(excel_obj, region_text)
+    cell = _get_region(excel_obj, region_text)
     cell.Select()
     if excel_obj.worksheet.AutoFilterMode:
         region = excel_obj.worksheet.AutoFilter.Range
@@ -531,7 +535,7 @@ def auto_fill(excel_obj, source, destination, fill_type="默认"):
     :param fill_type:
     :return:
     """
-    region = __get_region(excel_obj, source, used=False)
+    region = _get_region(excel_obj, source, used=False)
     if ":" not in source:
         start = source
     else:
@@ -540,7 +544,7 @@ def auto_fill(excel_obj, source, destination, fill_type="默认"):
         end = destination
     else:
         end = destination.split(":")[1]
-    dst = __get_region(excel_obj, f"{start}:{end}", used=False)
+    dst = _get_region(excel_obj, f"{start}:{end}", used=False)
 
     xl_fill_map = {
         "默认": 0,
@@ -580,8 +584,8 @@ def print_set(excel_obj, orientation='纵向', paper_size=None, wide=False, tall
     :return:
     """
     paper_size_map = {
-        "A4": 9,   # xlPaperA4
-        "A3": 8,   # xlPaperA3
+        "A4": 9,  # xlPaperA4
+        "A3": 8,  # xlPaperA3
         "A5": 11,  # xlPaperA5
         "B4": 12,  # xlPaperB4
         "B5": 13,  # xlPaperB5
@@ -605,7 +609,7 @@ def copy_region(excel_obj, region_text):
     :param region_text:
     :return:
     """
-    region = __get_region(excel_obj, region_text)
+    region = _get_region(excel_obj, region_text)
     region.Copy()
 
 
@@ -617,20 +621,20 @@ def paste_region(excel_obj, region_text, paste_option="粘贴全部内容"):
     :param paste_option:
     :return:
     """
-    region = __get_region(excel_obj, region_text)
+    region = _get_region(excel_obj, region_text)
     paste_option_map = {
-        "粘贴全部内容": -4104,                   # xlPasteAll
-        "粘贴除边框外的全部内容": 7,               # xlPasteAllExceptBorders
-        "将粘贴所有内容，并且将合并条件格式": 14,    # xlPasteAllMergingConditionalFormats
-        "使用源主题粘贴全部内容": 13,              # xlPasteAllUsingSourceTheme
-        "粘贴复制的列宽": 8,                     # xlPasteColumnWidths
-        "粘贴批注": -4144,                      # xlPasteComments
-        "粘贴复制的源格式": -4122,               # xlPasteFormats
-        "粘贴公式": -4123,                     # xlPasteFormulas
-        "粘贴公式和数字格式": 11,                # xlPasteFormulasAndNumberFormats
-        "粘贴有效性": 6,                       # xlPasteValidation
-        "粘贴值": -4163,                      # xlPasteValues
-        "粘贴值和数字格式": 12,                 # xlPasteValuesAndNumberFormats
+        "粘贴全部内容": -4104,  # xlPasteAll
+        "粘贴除边框外的全部内容": 7,  # xlPasteAllExceptBorders
+        "将粘贴所有内容，并且将合并条件格式": 14,  # xlPasteAllMergingConditionalFormats
+        "使用源主题粘贴全部内容": 13,  # xlPasteAllUsingSourceTheme
+        "粘贴复制的列宽": 8,  # xlPasteColumnWidths
+        "粘贴批注": -4144,  # xlPasteComments
+        "粘贴复制的源格式": -4122,  # xlPasteFormats
+        "粘贴公式": -4123,  # xlPasteFormulas
+        "粘贴公式和数字格式": 11,  # xlPasteFormulasAndNumberFormats
+        "粘贴有效性": 6,  # xlPasteValidation
+        "粘贴值": -4163,  # xlPasteValues
+        "粘贴值和数字格式": 12,  # xlPasteValuesAndNumberFormats
     }
     region.PasteSpecial(Paste=paste_option_map[paste_option])
 
@@ -655,8 +659,9 @@ def find_cell_address(excel_obj, text, region_text="all", look_in="值", look_at
         "部分匹配": 2,  # xlPart
         "全部匹配": 1,  # xlWhole
     }
-    region = __get_region(excel_obj, region_text)
-    match_cell = region.Find(What=text, After=list(region)[-1], LookIn=look_in_map[look_in], LookAt=look_at_map[look_at], MatchCase=match_case)
+    region = _get_region(excel_obj, region_text)
+    match_cell = region.Find(What=text, After=list(region)[-1], LookIn=look_in_map[look_in],
+                             LookAt=look_at_map[look_at], MatchCase=match_case)
     match_cell_address = []
     while match_cell:
         if match_cell.Address.replace("$", "") in match_cell_address:
@@ -675,27 +680,28 @@ def tran_col_location(col_location):
     alphabets = [
         'A', 'B', 'C', 'D', 'E', 'F', 'G',
         'H', 'I', 'J', 'K', 'L', 'M', 'N',
-        'O', 'P', 'Q',      'R', 'S', 'T',
-        'U', 'V', 'W',      'X', 'Y', 'Z',
+        'O', 'P', 'Q', 'R', 'S', 'T',
+        'U', 'V', 'W', 'X', 'Y', 'Z',
     ]
     if isinstance(col_location, str) and col_location.isalpha():
         col_str = col_location.upper()
         col_length = len(col_str)
-        col_int = sum([(alphabets.index(_)+1)*(26**(col_length-_index-1)) for _index, _ in enumerate(col_str)])
+        col_int = sum(
+            [(alphabets.index(_) + 1) * (26 ** (col_length - _index - 1)) for _index, _ in enumerate(col_str)])
         return col_int
     elif isinstance(col_location, int) and col_location > 0:
         col_int = col_location
         col_str = ""
         while col_int > 26:
             col_int, rem = divmod(col_int, 26)
-            col_str = alphabets[rem-1] + col_str
+            col_str = alphabets[rem - 1] + col_str
         col_str = alphabets[col_int - 1] + col_str
         return col_str
     else:
         raise Exception("不符合列名转换规则")
 
 
-def __get_region(excel_obj, region_text, used=True):
+def _get_region(excel_obj, region_text, used=True):
     """
     通过文本获取Range or Rows or Columns
     :param excel_obj:
@@ -723,13 +729,13 @@ def __get_region(excel_obj, region_text, used=True):
 
     if ":" in region_text:
         start, end = region_text.split(":")
-        if all([re.match('[A-Z]+\d+$', i) for i in [start, end]]):
+        if all([re.match(r'[A-Z]+\d+$', i) for i in [start, end]]):
             return ws.Range(region_text)
-        elif all([re.match('(\d+),(\d+)$', i) for i in [start, end]]):
+        elif all([re.match(r'(\d+),(\d+)$', i) for i in [start, end]]):
             row1, col1 = [int(i) for i in start.split(",")]
             row2, col2 = [int(i) for i in end.split(",")]
             return ws.Range(ws.Cells(row1, col1), ws.Cells(row2, col2))
-        elif all([re.match('\d+$', i) for i in [start, end]]):
+        elif all([re.match(r'\d+$', i) for i in [start, end]]):
             if used:
                 return ws.Range(ws.Cells(int(start), 1), ws.Cells(int(end), right))
             else:
@@ -742,12 +748,12 @@ def __get_region(excel_obj, region_text, used=True):
         else:
             raise Exception(f"{region_text}无法识别的单元格区域")
     else:
-        if re.match('[A-Z]+\d+$', region_text):
+        if re.match(r'[A-Z]+\d+$', region_text):
             return ws.Range(region_text)
-        elif re.match('(\d+),(\d+)$', region_text):
+        elif re.match(r'(\d+),(\d+)$', region_text):
             row, col = [int(i) for i in region_text.split(',')]
             return ws.Cells(row, col)
-        elif re.match('\d+$', region_text):
+        elif re.match(r'\d+$', region_text):
             if used:
                 return ws.Range(ws.Cells(int(region_text), 1), ws.Cells(int(region_text), right))
             else:
