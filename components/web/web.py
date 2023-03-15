@@ -289,28 +289,6 @@ def switch_window(web_driver: WebDriver, window: Union[str, int] = "", switch_ty
 
 
 if __name__ == '__main__':
-    # web_driver = open_browser(r"C:\Users\chao3.li\Desktop\output")
-    # open_url(web_driver, "boss.zkh360.com")
-    # input_text(web_driver, '//*[@id="username"]', "chao3.li")
-    # input_text(web_driver, '//*[@id="password"]', "1004.com")
-    # click_element(web_driver, '//*[@id="loginButton"]')
-    # time.sleep(2)
-    # alert_text = handle_alert(web_driver)
-    # if alert_text:
-    #     raise Exception(alert_text)
-    # exist = element_is_exist(web_driver, '//button[text()="稍后更改"]')
-    # if exist:
-    #     click_element(web_driver, '//button[text()="稍后更改"]')
-    # click_element(web_driver, '//span[text()="对账中心"]')
-    # click_element(web_driver, '//a[@title="对账依据"]')
-    # switch_window(web_driver, switch_type="最新")
-    # hover_element(web_driver, '//*[@id="app"]/div[1]/div[2]/div[1]/div/span')
-    # time.sleep(3)
-    # hover_element(web_driver, '//*[@id="app"]/div[1]/div[2]/div[1]/div/span')
-    # switch_window(web_driver, window=1, switch_type="位置")
-    # # web_driver.switch_to.window(web_driver.current_window_handle)
-    # click_element(web_driver, '//span[text()="销售跟单"]')
-    # # hover_element(web_driver, '//span[text()="销售跟单"]')
     driver = open_browser()
     open_url(driver, "www.baidu.com")
 
