@@ -22,3 +22,41 @@ def sort_list(src_list: list, reverse: str):
         src_list.sort(reverse=True)
     else:
         src_list.sort()
+
+
+def transpose_list(src_list: list):
+    return list(map(list, zip(*src_list)))
+
+
+def update_one(src_list: list, idx: int = 0):
+    # idx = idx - 1 if idx > 0 else idx
+    return src_list[idx]
+
+
+def get_data_index(src_list: list, data):
+    return src_list.index(data)
+
+
+def duplicate_list(src_list: list):
+    return list(set(src_list)).sort(key=src_list.index)
+
+
+def filter_list(src_list: list, filter_data: list):
+    return [i for i in src_list if i not in filter_data]
+
+
+def get_same_data(src_list1: list, src_list2: list):
+    return list(set(src_list1) & set(src_list2))
+
+
+def get_max_data(src_list: list):
+    return max(src_list)
+
+
+def get_min_data(src_list: list):
+    return min(src_list)
+
+
+def delete_none_data(src_list: list):
+    return [i for i in src_list if i]
+

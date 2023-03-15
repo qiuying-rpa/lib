@@ -53,8 +53,8 @@ def slice_string(text: str, start_index: int, end_index: int) -> str:
     :param end_index:
     :return:
     """
-    start_index = start_index - 1 if start_index > 0 else start_index
-    end_index = end_index - 1 if end_index > 0 else end_index
+    # start_index = start_index - 1 if start_index > 0 else start_index
+    # end_index = end_index - 1 if end_index > 0 else end_index
     return text[start_index, end_index]
 
 
