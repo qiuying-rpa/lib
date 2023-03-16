@@ -5,7 +5,7 @@ Created at 2023/3/15 17:42
 """
 
 
-def add_key_value(src_dict: dict, key, value):
+def update_dict(src_dict: dict, key, value):
     src_dict.update({
         key: value
     })

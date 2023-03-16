@@ -17,8 +17,8 @@ def concat_list(src_list: list, r_list: list):
     return src_list + r_list
 
 
-def sort_list(src_list: list, reverse: str):
-    if reverse == "descending":
+def sort_list(src_list: list, reverse: str = "升序"):
+    if reverse == "降序":
         src_list.sort(reverse=True)
     else:
         src_list.sort()
@@ -28,8 +28,12 @@ def transpose_list(src_list: list):
     return list(map(list, zip(*src_list)))
 
 
-def update_one(src_list: list, idx: int = 0):
+def update_one(src_list: list, idx: int, value):
     # idx = idx - 1 if idx > 0 else idx
+    src_list[idx] = value
+
+
+def get_data_from_index(src_list: list, idx: int):
     return src_list[idx]
 
 
@@ -58,5 +62,6 @@ def get_min_data(src_list: list):
 
 
 def delete_none_data(src_list: list):
-    return [i for i in src_list if i]
+    none_list = ["", None]
+    return filter_list(src_list, none_list)
 

@@ -58,14 +58,14 @@ def slice_string(text: str, start_index: int, end_index: int) -> str:
     return text[start_index, end_index]
 
 
-def trans_upper_or_lower(text: str, trans_type: str) -> str:
+def trans_upper_or_lower(text: str, trans_type: str = "小写转大写") -> str:
     """
 
     :param text:
     :param trans_type: ["upper", "lower"]
     :return:
     """
-    if trans_type == "upper":
+    if trans_type == "小写转大写":
         return text.upper()
     else:
         return text.lower()
