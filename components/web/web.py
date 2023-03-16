@@ -46,6 +46,11 @@ def _load_driver_default_setting(web_driver: WebDriver):
 
 
 def open_browser(download_folder: str = "") -> WebDriver:
+    """
+    打开浏览器
+    :param download_folder:
+    :return:
+    """
     options = _load_browser_default_option(download_folder)
     web_driver = webdriver.Chrome(options=options)
     _load_driver_default_setting(web_driver)
@@ -69,6 +74,7 @@ def element_is_exist(web_driver: WebDriver, locator: str, timeout: float = 10):
 
 
 def wait_until_element(web_driver: WebDriver, locator: str, wait_type: str, timeout: float = 10):
+    wait_type = "visible" if wait_type == "出现" else "disappear"
     begin_time = time.time()
     if wait_type == "visible":
         element_exist = element_is_exist(web_driver, locator, timeout)
@@ -138,7 +144,7 @@ def clear_element(web_driver: WebDriver, locator: str, timeout: float = 10):
         raise TimeoutException(f"查找元素：{locator}超时.")
 
 
-def input_text(web_driver: WebDriver, locator: str, text: str, clear_flag: bool=True, timeout: float = 10):
+def input_text(web_driver: WebDriver, locator: str, text: str, clear_flag: bool = True, timeout: float = 10):
     element_exist = element_is_exist(web_driver, locator, timeout=timeout)
     if element_exist:
         ele = web_driver.find_element(By.XPATH, locator)
@@ -175,11 +181,11 @@ def reload_page(web_driver: WebDriver):
     web_driver.refresh()
 
 
-def execute_javascript(web_driver: WebDriver, js_code):
+def execute_javascript(web_driver: WebDriver, js_code: str):
     web_driver.execute_script(js_code)
 
 
-def get_web_info(web_driver: WebDriver, attr_name:str):
+def get_web_info(web_driver: WebDriver, attr_name: str) -> str:
     if attr_name == "标题":
         return web_driver.title
     elif attr_name == "html源码":
@@ -189,7 +195,7 @@ def get_web_info(web_driver: WebDriver, attr_name:str):
     elif attr_name == "cookies":
         return web_driver.get_cookies()
     else:
-        return "不支持的网页信息。"
+        raise TypeError("不支持的网页信息。")
 
 
 def get_element_attr(web_driver: WebDriver, locator: str, attr_name: str, timeout: float = 10):
@@ -225,7 +231,7 @@ def switch_iframe(web_driver: WebDriver, locator: str, timeout: float = 10):
         raise TimeoutException(f"查找iframe：{locator}超时.")
 
 
-def exit_iframe(web_driver: WebDriver, timeout: float = 10):
+def exit_iframe(web_driver: WebDriver):
     web_driver.switch_to.default_content()
 
 
@@ -291,12 +297,5 @@ def switch_window(web_driver: WebDriver, window: Union[str, int] = "", switch_ty
 if __name__ == '__main__':
     driver = open_browser()
     open_url(driver, "www.baidu.com")
-
-
-
-
-
-
-
 
 
