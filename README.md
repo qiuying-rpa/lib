@@ -6,3 +6,10 @@ A plain, simple and this-is-the-way library for RPA developing.
 
 - web
 - excel
+
+## Get Started
+
+
+```
+pip install qiuying
+```
