@@ -10,7 +10,7 @@ import setuptools
 
 import qiuying
 
-with open("qiuying/README.md", "r") as f:
+with open("README.md", "r") as f:
     long_description = f.read()
     setuptools.setup(
         name="qiuying",
@@ -21,10 +21,11 @@ with open("qiuying/README.md", "r") as f:
         long_description=long_description,
         long_description_content_type="text/markdown",
         url="https://github.com/qiuying-rpa/qiuying",
-        packages=setuptools.find_packages(exclude=['tests']),
+        packages=setuptools.find_packages(exclude=['tests', 'README.md']),
         classifiers=[
             "Programming Language :: Python :: 3",
             "License :: OSI Approved :: MIT License",
             "Operating System :: Microsoft :: Windows",
         ],
+        install_requires=['pynput>=1.7.6', 'pywin32>=305', 'selenium>=4.8.2', 'requests>=2.28.2']
     )
