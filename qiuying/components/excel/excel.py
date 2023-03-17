@@ -2,7 +2,7 @@ import os
 import re
 import win32com.client
 
-from models.excel import ExcelObj
+from qiuying.models.excel import ExcelObj
 
 
 def open_excel(file_path, sheet_name=1, password=None, visible=True):

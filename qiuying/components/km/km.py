@@ -7,7 +7,6 @@ Created at 2022/09/26 14:00
 import time
 from pynput import keyboard, mouse
 from pynput.keyboard import Key
-from models.error import InvalidMouseButtonException
 
 _mouse_controller = mouse.Controller()
 _keyboard_controller = keyboard.Controller()
@@ -166,11 +165,8 @@ def mouse_click(dx: int = 0, dy: int = 0, delay_after: float = 0, start_position
     :param double_click:
     :raises InvalidMouseButtonException:
     """
-    if hasattr(mouse.Button, button_type):
-        mouse_move(dx, dy, delay_after, start_position)
-        _mouse_controller.click(getattr(mouse.Button, button_type), 2 if double_click else 1)
-    else:
-        raise InvalidMouseButtonException(button_type)
+    mouse_move(dx, dy, delay_after, start_position)
+    _mouse_controller.click(getattr(mouse.Button, button_type), 2 if double_click else 1)
 
 
 def mouse_scroll(dy: int = 0, dx: int = 0, delay_after: float = 0):
